@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Note Management - Firestore</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 30px;
+      background-color: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 10px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #1976d2;
+      color: white;
+      font-size: 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #125ea6;
+    }
+
+    #output {
+      border: 1px solid #ccc;
+      background-color: #fafafa;
+      padding: 20px;
+      border-radius: 5px;
+      min-height: 80px;
+    }
+
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    li {
+      padding: 8px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    li:last-child {
+      border-bottom: none;
+    }
+
+    p {
+      margin: 0;
+    }
+  </style>
+
+  <script type="module" defer>
+    import { FirestoreService } from './firestore_query.js';
+
+    const courseId = "math101";
+    const studentId = "studentA";
+    const path = `Courses/${courseId}/Students/${studentId}/Performance`;
+
+    const service = new FirestoreService(path);
+    const outputDiv = document.getElementById('output');
+
+    window.seedPerformanceData = async () => {
+      await service.seedPerformanceData();
+      showMessage("5 random records have been created.");
+    };
+
+    window.queryHighScores = async () => {
+      const records = await service.queryHighScores();
+      renderRecords(records, "Records with score > 4.0:");
+    };
+
+    window.computeAverage = async () => {
+      const avg = await service.computeAverageScore();
+      if (avg !== null) {
+        showMessage(`The average score is: ${avg}`);
+      } else {
+        showMessage("no data to calculate the average.");
+      }
+    };
+
+    window.showAllRecords = async () => {
+      const records = await service.getAllDocuments();
+      renderRecords(records, "All records:");
+    };
+
+    function renderRecords(dataArray, title) {
+      if (!dataArray.length) {
+        showMessage("No se encontraron registros.");
+        return;
+      }
+
+      let html = `<h3>${title}</h3><ul>`;
+      dataArray.forEach(doc => {
+        const fecha = new Date(doc.timestamp.seconds * 1000).toLocaleString();
+        html += `<li><strong>Score:</strong> ${doc.score} | <strong>Fecha:</strong> ${fecha} | <strong>Comentario:</strong> ${doc.comment}</li>`;
+      });
+      html += `</ul>`;
+      outputDiv.innerHTML = html;
+    }
+
+    function showMessage(message) {
+      outputDiv.innerHTML = `<p>${message}</p>`;
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Note Management - Firestore</h1>
+
+    <div class="button-group">
+      <button onclick="seedPerformanceData()">Create 5 random records</button>
+      <button onclick="queryHighScores()">Consult scores > 4.0</button>
+      <button onclick="computeAverage()">Calculate average</button>
+      <button onclick="showAllRecords()">Show all records</button>
+    </div>
+
+    <div id="output"></div>
+    <h1></h1>
+  </div>
+</body>
+</html>
