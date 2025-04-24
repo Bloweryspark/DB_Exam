@@ -1,0 +1,28 @@
+*first point*
+
+The nested database structure closely mirrors real-world logic: each course contains students, and each student has their own performance records specific to that course.
+This model is highly effective for storing and retrieving individual performance data, as it provides a clear, scalable, and hierarchical organization.
+
+However, the main limitation arises when attempting to perform global queries, such as listing all students with high average scores across multiple courses.
+Because the data is stored within subcollections nested under each course and student, this type of query would require traversing multiple paths and performing numerous reads.
+This makes the operation time-consuming and resource-intensive, which negatively impacts performance and cost efficiency.
+
+
+*four point*
+
+The query fails due to the lack of an index in Firebase.
+When the index is not created, the query fails because it combines multiple conditions.
+In the error message, Firebase provides a link that allows you to automatically create the required index.
+
+In this case, the query combines score > 4.0 and timestamp, both in descending order.
+
+The index that is created can be reused as long as the same fields and order are used.
+For example, you can change the filter value to something like score > 3.5 or score < 3.0 and still use the same index.
+
+*Six point*
+
+The current setup complicates the search for top-performing students across all courses, as the data is stored in nested subcollections.
+This leads to numerous evaluations and affects overall performance.
+It is suggested to create a dedicated TopStudents collection with average scores per student ID and course ID.
+This would allow efficient queries using filters and sorting.
+The collection can be updated automatically or through scheduled procedures.
